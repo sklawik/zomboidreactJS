@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "lib": ["ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "C:/Users/18172/Zomboid/mods",
+    "rootDir": "src",
+    "strict": true,
+    "strictNullChecks": false,
+    "target": "ESNext",
+    "types": [
+      "lua-types/5.1",
+      "@asledgehammer/pipewrench",
+      "@asledgehammer/pipewrench-events"
+    ],
+    "jsx": "react",
+    "jsxFactory": "PipeWrenchUI.createElement",
+    "jsxFragmentFactory": "PipeWrenchUI.Fragment"
+  },
+  "tstl": {
+    "luaTarget": "5.1",
+    "luaLibImport": "require",
+    "noHeader": true,
+    "tstlVerbose": false,
+    "luaPlugins": [
+      {
+        "name": "@asledgehammer/tstl-pipewrench"
+      }
+    ]
+  },
+  "include": ["src"]
+}

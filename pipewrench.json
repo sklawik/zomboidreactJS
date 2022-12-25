@@ -1,0 +1,13 @@
+{
+  "modInfo": {
+    "name": "PipeWrench-UI",
+    "poster": "./poster.png",
+    "description": "A HTML library for Project Zomboid.",
+    "id": "@pipewrench-ui",
+    "url": "github.com/asledgehammer"
+  },
+  "modelsDir": "./src/models",
+  "texturesDir": "./src/textures",
+  "soundDir": "./src/sound",
+  "scriptsDir": "./src/scripts"
+}
