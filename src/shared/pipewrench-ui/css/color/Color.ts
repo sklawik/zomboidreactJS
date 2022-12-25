@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { RGBA, parseRGBA, asRGBA, formatRGBA } from './RGBA';
 import {
   RGB,

@@ -1,4 +1,6 @@
-export type OptionalFunction = () => void;
+import { PWUIElement } from "./elements/PWUIElement";
+
+export type OptionalElementFunction = (element: PWUIElement) => void;
 export type ElementFactory = (props: Props, children?: Element[]) => Element;
 export type ElementChildren = string | Element | ElementChildren[];
 export type Props = {};

@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { clamp, RANGE_1, RANGE_255 } from '../math/Math';
 import { RGB } from './RGB';
 
@@ -34,16 +36,16 @@ export const parseRGBA = (raw: string, format: '1' | '255'): RGBA => {
   // [red=[0, 255], green=[0, 255], blue=[0, 255], alpha=[0, 1]]
   let values = raw
     .replace('rgba(', '')
-    .substring(0, raw.length - 1)
+    .replace(')', '')
     .split(',');
   if (values.length !== 4) {
     throw new Error(`Invalid rgba() rule: ${raw} (Not 4 values)`);
   }
 
   let result = {
-    r: clamp(tonumber(values[0].trim()), RANGE_255),
-    g: clamp(tonumber(values[1].trim()), RANGE_255),
-    b: clamp(tonumber(values[2].trim()), RANGE_255),
+    r: clamp(Math.round(tonumber(values[0].trim())), RANGE_255),
+    g: clamp(Math.round(tonumber(values[1].trim())), RANGE_255),
+    b: clamp(Math.round(tonumber(values[2].trim())), RANGE_255),
     a: clamp(tonumber(values[3].trim()), RANGE_1),
     format
   };

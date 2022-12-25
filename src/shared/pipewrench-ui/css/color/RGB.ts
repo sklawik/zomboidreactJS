@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { clamp, RANGE_1, RANGE_255 } from '../math/Math';
 import { CMYK, RANGE_100 } from './CMYK';
 import { HSL } from './HSL';
@@ -33,15 +35,15 @@ export const parseRGB = (raw: string, format: '1' | '255'): RGB => {
   // [red=[0, 255], green=[0, 255], blue=[0, 255]]
   let values = raw
     .replace('rgba(', '')
-    .substring(0, raw.length - 1)
+    .replace(')', '')
     .split(',');
   if (values.length !== 3) {
     throw new Error(`Invalid rgb() rule: ${raw} (Not 3 values)`);
   }
   let result = {
-    r: clamp(tonumber(values[0].trim()), RANGE_255),
-    g: clamp(tonumber(values[1].trim()), RANGE_255),
-    b: clamp(tonumber(values[2].trim()), RANGE_255),
+    r: clamp(Math.round(tonumber(values[0].trim())), RANGE_255),
+    g: clamp(Math.round(tonumber(values[1].trim())), RANGE_255),
+    b: clamp(Math.round(tonumber(values[2].trim())), RANGE_255),
     format
   };
   if (format === '1') {

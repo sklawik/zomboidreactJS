@@ -1,6 +1,4 @@
 /**
- * @noSelfInFile
- *
  * @author JabDoesThings
  */
 

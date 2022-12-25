@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { clamp, RANGE_1, RANGE_255 } from '../math/Math';
 import { RGB } from './RGB';
 
@@ -29,7 +31,7 @@ export const parseCMYK = (raw: string): CMYK => {
   // [cyan=[0, 100], magenta=[0, 100], yellow=[0, 100], black=[0, 100]]
   let values = raw
     .replace('cmyk(', '')
-    .substring(0, raw.length - 1)
+    .replace(')', '')
     .split(',');
   if (values.length !== 4) {
     throw new Error(`Invalid cmyk() rule: ${raw} (Not 4 values)`);

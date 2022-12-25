@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { clamp, RANGE_1, RANGE_255 } from '../math/Math';
 import { RGB } from './RGB';
 
@@ -19,7 +21,7 @@ export const parseHSL = (raw: string): HSL => {
   }
   let values = raw
     .replace('hsl(', '')
-    .substring(0, raw.length - 1)
+    .replace(')', '')
     .split(',');
   if (values.length !== 3) {
     throw new Error(`Invalid hsl() rule: ${raw} (Not 3 values.)`);

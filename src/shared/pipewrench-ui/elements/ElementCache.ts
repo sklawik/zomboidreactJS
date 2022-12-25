@@ -60,13 +60,13 @@ export const formatColor = (
 ): RGBA => {
   value = value.toLowerCase().trim();
   if (value.indexOf('#') === 0) return parseHEX(value, '1');
-  else if (value.indexOf('cmyk(') === 0) {
+  else if (value.indexOf('cmyk(') !== -1) {
     return { ...CMYK_2_RGB(parseCMYK(value), '1'), a: 1 };
-  } else if (value.indexOf('rgb(') === 0) {
+  } else if (value.indexOf('rgb(') !== -1) {
     return { ...parseRGB(value, '1'), a: 1 };
-  } else if (value.indexOf('rgba(') === 0) {
+  } else if (value.indexOf('rgba(') !== -1) {
     return parseRGBA(value, '1');
-  } else if (value.indexOf('hsl(') === 0) {
+  } else if (value.indexOf('hsl(') !== -1) {
     return { ...HSL_2_RGB(parseHSL(value), '1'), a: 1 };
   } else if (value.indexOf('inherit') !== -1) {
     if (element.parent != null) {

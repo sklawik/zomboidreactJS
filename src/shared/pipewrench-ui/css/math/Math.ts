@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 export type ValueRange = { min: number; max: number };
 export type NamedValue = { name: string; value: number };
 

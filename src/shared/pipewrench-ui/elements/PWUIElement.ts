@@ -1,16 +1,16 @@
 import { CSSRuleset } from '../css/CSS';
 import { CSSReader } from '../css/CSSParser';
 import { UIElement, UIManager } from '@asledgehammer/pipewrench';
-import { AnyProps, Element, OptionalFunction } from '../PipeWrenchUI';
+import { AnyProps, Element, OptionalElementFunction } from '../PipeWrenchUI';
 import { ElementCache } from './ElementCache';
 
 export interface I_PWUIElement {
   style?: string;
   class?: string;
   id?: string;
-  'on-update'?: OptionalFunction;
-  'on-prerender'?: OptionalFunction;
-  'on-render'?: OptionalFunction;
+  'on-update'?: OptionalElementFunction;
+  'on-prerender'?: OptionalElementFunction;
+  'on-render'?: OptionalElementFunction;
 }
 
 /**
@@ -76,16 +76,15 @@ export class PWUIElement implements Element {
   }
 
   /** (Java-side hook into the mock ISUIElement) */
-  update(): void {
-    if (this.onUpdate != null) this.onUpdate();
+  update2(): void {
+    // Calculate the values used by the element to position & render.
+    this.cache.calculate(this._dirty);
+    if (this.onUpdate != null) this.onUpdate(this);
   }
 
   /** (Java-side hook into the mock ISUIElement) */
   prerender(): void {
-    if (this.onPreRender != null) this.onPreRender();
-
-    // Calculate the values used by the element to position & render.
-    this.cache.calculate(this._dirty);
+    if (this.onPreRender != null) this.onPreRender(this);
     this._dirty = false;
   }
 
@@ -106,14 +105,15 @@ export class PWUIElement implements Element {
 
     // Draw the background of the element.
     const { value: backgroundColor } = this.cache.backgroundColor;
-    if (backgroundColor.a !== 0) {
+
+    if (backgroundColor != null && backgroundColor.a !== 0) {
       // (Only draw if the color isn't fully transparent)
       const { r, g, b, a } = backgroundColor;
       // print(`${r} ${g} ${b} ${a}`)
       this.javaObject?.DrawTextureScaledColor(null, x, y, w, h, r, g, b, a);
     }
 
-    if (this.onRender != null) this.onRender();
+    if (this.onRender != null) this.onRender(this);
   }
 
   /**
@@ -157,7 +157,7 @@ export class PWUIElement implements Element {
     return this.children.length !== 0;
   }
 
-  protected onUpdate() {}
-  protected onPreRender() {}
-  protected onRender() {}
+  protected onUpdate(element: PWUIElement) {}
+  protected onPreRender(element: PWUIElement) {}
+  protected onRender(element: PWUIElement) {}
 }

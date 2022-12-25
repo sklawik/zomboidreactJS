@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { RGB_2_CMYK, RGB_2_HSL } from './RGB';
 import { parseHSL as readHSL, HSL_2_RGB } from './HSL';
 import { CMYK_2_RGB, parseCMYK as readCMYK } from './CMYK';

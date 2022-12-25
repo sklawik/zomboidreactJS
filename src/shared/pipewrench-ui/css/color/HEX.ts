@@ -1,3 +1,5 @@
+/** @noSelfInFile */
+
 import { RGBA } from './RGBA';
 
 export const parseHEX = (hex: string, format: '1' | '255'): RGBA => {
