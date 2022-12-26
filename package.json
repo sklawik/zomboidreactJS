@@ -34,7 +34,7 @@
     "@asledgehammer/tstl-pipewrench": "^0.0.13",
     "@types/fs-extra": "^9.0.13",
     "@types/react": "^18.0.26",
-    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
     "del-cli": "^5.0.0",
     "eslint": "^8.30.0",
