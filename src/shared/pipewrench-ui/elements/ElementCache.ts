@@ -1,5 +1,5 @@
 import { PWUIElement } from './PWUIElement';
-import { Core } from '@asledgehammer/pipewrench';
+import { Core, Texture } from '@asledgehammer/pipewrench';
 import {
   asRGBA,
   CMYK_2_RGB,
@@ -12,6 +12,7 @@ import {
   RGBA,
   transparent
 } from '../css/color/Color';
+import { TextureCache } from '../TextureCache';
 
 export class CachedValue<Type> {
   value: Type;
@@ -29,6 +30,7 @@ export class ElementCache {
   width: CachedValue<number> = new CachedValue(0);
   height: CachedValue<number> = new CachedValue(0);
   backgroundColor: CachedValue<RGBA> = new CachedValue(asRGBA(0, 0, 0, 0, '1'));
+  backgroundImage: CachedValue<Texture> = new CachedValue(null);
 
   constructor(element: PWUIElement) {
     this.element = element;
@@ -45,11 +47,48 @@ export class ElementCache {
     this.y.value = formatNumValue(element, 'top', style.top);
     this.width.value = formatNumValue(element, 'width', style.width);
     this.height.value = formatNumValue(element, 'height', style.height);
+
+    this.calculateBackgroundColor(force);
+    this.calculateBackgroundImage(force);
+  }
+
+  calculateDimensions(force: boolean) {
+    const { element } = this;
+    const { style } = element;
+    this.x.value = formatNumValue(element, 'left', style.left);
+    this.y.value = formatNumValue(element, 'top', style.top);
+    this.width.value = formatNumValue(element, 'width', style.width);
+    this.height.value = formatNumValue(element, 'height', style.height);
+  }
+
+  calculateBackgroundColor(force: boolean) {
+    if (!this.backgroundColor.dirty && !force) return;
+
+    const { element } = this;
+    const { style } = element;
+
     this.backgroundColor.value = formatColor(
       element,
       'background-color',
       style['background-color']
     );
+    this.backgroundColor.dirty = false;
+  }
+
+  calculateBackgroundImage(force: boolean) {
+    if (!this.backgroundColor.dirty && !force) return;
+
+    const { element } = this;
+    const { style } = element;
+
+    let backgroundImage = style['background-image'];
+    if (backgroundImage != null && backgroundImage.indexOf('url(') !== -1) {
+      backgroundImage = backgroundImage.replace('url(', '').replace(')', '');
+      this.backgroundImage.value = TextureCache.getOrLoad(backgroundImage);
+    } else {
+      this.backgroundImage.value = null;
+    }
+    this.backgroundImage.dirty = false;
   }
 }
 

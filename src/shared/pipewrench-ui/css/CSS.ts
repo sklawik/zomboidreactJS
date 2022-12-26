@@ -155,6 +155,7 @@ export class CSSRuleset {
   'max-height': MaxHeightRule | string = 'none';
 
   'background-color': string = 'none';
+  'background-image': string = 'none';
 
   constructor(raw?: SelectorBlock) {
     if (raw != null) {

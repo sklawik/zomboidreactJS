@@ -78,7 +78,7 @@ export class PWUIElement implements Element {
   /** (Java-side hook into the mock ISUIElement) */
   update2(): void {
     // Calculate the values used by the element to position & render.
-    this.cache.calculate(this._dirty);
+    this.cache.calculate(true);
     if (this.onUpdate != null) this.onUpdate(this);
   }
 
@@ -103,17 +103,24 @@ export class PWUIElement implements Element {
     this.javaObject?.setWidth(w);
     this.javaObject?.setHeight(h);
 
+    this.renderBackground(x, y, w, h);
+
+    if (this.onRender != null) this.onRender(this);
+  }
+
+  protected renderBackground(x: number, y: number, w: number, h: number) {
     // Draw the background of the element.
     const { value: backgroundColor } = this.cache.backgroundColor;
+    const { value: texture } = this.cache.backgroundImage;
+
+    print(texture);
 
     if (backgroundColor != null && backgroundColor.a !== 0) {
       // (Only draw if the color isn't fully transparent)
       const { r, g, b, a } = backgroundColor;
       // print(`${r} ${g} ${b} ${a}`)
-      this.javaObject?.DrawTextureScaledColor(null, x, y, w, h, r, g, b, a);
+      this.javaObject?.DrawTextureScaledColor(texture, x, y, w, h, r, g, b, a);
     }
-
-    if (this.onRender != null) this.onRender(this);
   }
 
   /**
