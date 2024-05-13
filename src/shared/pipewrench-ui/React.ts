@@ -2,8 +2,9 @@
 //
 //   URL: https://gist.github.com/probable-basilisk/3d1ff2c9a932c03cfb598f02678951c3
 
-import { I_PWUIElement, PWUIElement } from './elements/PWUIElement';
-import { Text } from './elements/Text';
+import { IPWUIElementAttributes, PWUIElement } from './elements/PWUIElement';
+import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/PWUIRadialMenu';
+import { PWUITextArea as PWUITextArea } from './elements/Text';
 import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
 
 /* ########################################################## */
@@ -12,14 +13,17 @@ import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      element: I_PWUIElement;
+      element: IPWUIElementAttributes;
+      radialmenu: IPWUIRadialMenuAttributes;
     }
   }
 }
 
 // Element Classes.
 export let primitives: { [name: string]: Element } = {
-  element: PWUIElement
+  element: PWUIElement,
+  radialmenu: PWUIRadialMenu,
+  textarea: PWUITextArea,
 };
 
 /* ########################################################## */
@@ -47,7 +51,7 @@ export namespace PipeWrenchUI {
     target: Element[]
   ): void {
     if (typeof children == 'string') {
-      target.push(new Text({ text: children }));
+      target.push(new PWUITextArea({ text: children }));
     } else {
       try {
         for (const child of children as ElementChildren[]) {

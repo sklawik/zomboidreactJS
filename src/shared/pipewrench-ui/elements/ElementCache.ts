@@ -1,4 +1,3 @@
-import { PWUIElement } from './PWUIElement';
 import { Core, Texture } from '@asledgehammer/pipewrench';
 import {
   asRGBA,
@@ -13,6 +12,7 @@ import {
   transparent
 } from '../css/color/Color';
 import { TextureCache } from '../TextureCache';
+import { AbstractElement } from './AbstractElement';
 
 export class CachedValue<Type> {
   value: Type;
@@ -23,7 +23,7 @@ export class CachedValue<Type> {
 }
 
 export class ElementCache {
-  element: PWUIElement;
+  element: AbstractElement<string>;
 
   x: CachedValue<number> = new CachedValue(0);
   y: CachedValue<number> = new CachedValue(0);
@@ -32,7 +32,7 @@ export class ElementCache {
   backgroundColor: CachedValue<RGBA> = new CachedValue(asRGBA(0, 0, 0, 0, '1'));
   backgroundImage: CachedValue<Texture> = new CachedValue(null);
 
-  constructor(element: PWUIElement) {
+  constructor(element: AbstractElement<string>) {
     this.element = element;
   }
 
@@ -41,20 +41,14 @@ export class ElementCache {
    * @param force If true, render every value regardless of their dirty states.
    */
   calculate(force: boolean = false) {
-    const { element } = this;
-    const { style } = element;
-    this.x.value = formatNumValue(element, 'left', style.left);
-    this.y.value = formatNumValue(element, 'top', style.top);
-    this.width.value = formatNumValue(element, 'width', style.width);
-    this.height.value = formatNumValue(element, 'height', style.height);
-
+    this.calculateDimensions(force);
     this.calculateBackgroundColor(force);
     this.calculateBackgroundImage(force);
   }
 
   calculateDimensions(force: boolean) {
     const { element } = this;
-    const { style } = element;
+    const { cssRuleset: style } = element;
     this.x.value = formatNumValue(element, 'left', style.left);
     this.y.value = formatNumValue(element, 'top', style.top);
     this.width.value = formatNumValue(element, 'width', style.width);
@@ -65,7 +59,7 @@ export class ElementCache {
     if (!this.backgroundColor.dirty && !force) return;
 
     const { element } = this;
-    const { style } = element;
+    const { cssRuleset: style } = element;
 
     this.backgroundColor.value = formatColor(
       element,
@@ -79,7 +73,7 @@ export class ElementCache {
     if (!this.backgroundColor.dirty && !force) return;
 
     const { element } = this;
-    const { style } = element;
+    const { cssRuleset: style } = element;
 
     let backgroundImage = style['background-image'];
     if (backgroundImage != null && backgroundImage.indexOf('url(') !== -1) {
@@ -93,7 +87,7 @@ export class ElementCache {
 }
 
 export const formatColor = (
-  element: PWUIElement,
+  element: AbstractElement<string>,
   property: string,
   value: string
 ): RGBA => {
@@ -124,7 +118,7 @@ export const formatColor = (
 };
 
 export const formatNumValue = (
-  element: PWUIElement,
+  element: AbstractElement<string>,
   property: string,
   value: string
 ): number => {

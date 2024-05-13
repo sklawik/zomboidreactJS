@@ -15,13 +15,13 @@ export class CSSTests {
     const hsl = readHSL(orig);
     const hsl2rgb = HSL_2_RGB(hsl, '1');
     const rgb2hsl = RGB_2_HSL(hsl2rgb);
-    print(`Original: ${orig}`);
-    print('HSL:');
-    print(hsl);
-    print('HSL 2 RGB:');
-    print(hsl2rgb);
-    print('RGB 2 HSL:');
-    print(rgb2hsl);
+    // print(`Original: ${orig}`);
+    // print('HSL:');
+    // print(hsl);
+    // print('HSL 2 RGB:');
+    // print(hsl2rgb);
+    // print('RGB 2 HSL:');
+    // print(rgb2hsl);
   }
 
   testCMYK() {
@@ -29,12 +29,12 @@ export class CSSTests {
     const cmyk = readCMYK(orig);
     const cmyk2rgb = CMYK_2_RGB(cmyk, '1');
     const rgb2cmyk = RGB_2_CMYK(cmyk2rgb);
-    print(`Original: ${orig}`);
-    print('CMYK:');
-    print(cmyk);
-    print('CMYK 2 RGB:');
-    print(cmyk2rgb);
-    print('RGB 2 CMYK:');
-    print(rgb2cmyk);
+    // print(`Original: ${orig}`);
+    // print('CMYK:');
+    // print(cmyk);
+    // print('CMYK 2 RGB:');
+    // print(cmyk2rgb);
+    // print('RGB 2 CMYK:');
+    // print(rgb2cmyk);
   }
 }

@@ -4,9 +4,10 @@
 import * as Events from '@asledgehammer/pipewrench-events';
 import { asRGBA, RGBA } from '../../shared/pipewrench-ui/css/color/RGBA';
 import { easeInOut } from '../../shared/pipewrench-ui/css/math/Math';
-import { PWUIElement } from '../../shared/pipewrench-ui/elements/PWUIElement';
-import { OptionalElementFunction } from '../../shared/pipewrench-ui/PipeWrenchUI';
+import { Element, OptionalElementFunction } from '../../shared/pipewrench-ui/PipeWrenchUI';
 import { PipeWrenchUI, createUI } from '../../shared/pipewrench-ui/React';
+import { AbstractElement } from '../../shared/pipewrench-ui/elements/AbstractElement';
+import { PWUIElement } from '../../shared/pipewrench-ui/elements/PWUIElement';
 
 // This is the tick counter for keeping track of where in the cycle we are for the animation.
 let tick = 0;
@@ -20,7 +21,10 @@ const maxWidth = 1024;
 // The color values that we keep track of.
 const color: RGBA = asRGBA(255, 31, 31, 0, '255');
 
-const onUpdate: OptionalElementFunction = (element: PWUIElement) => {
+const onUpdate: OptionalElementFunction = (e: Element) => {
+  
+  const element: AbstractElement<string> = e as AbstractElement<string>;
+  
   // The lerp value stores the percentage value [0, 1] that will control how the animation calculates.
   let lerp;
 
@@ -54,8 +58,8 @@ const onUpdate: OptionalElementFunction = (element: PWUIElement) => {
 
   // Set our values very similar to how JavaScript API works when editing HTMLElement.style.
   const { r, g, b, a } = color;
-  element.style['width'] = `${width}px`;
-  element.style['background-color'] = `rgba(${r}, ${g}, ${b}, ${a})`;
+  element.cssRuleset['width'] = `${width}px`;
+  element.cssRuleset['background-color'] = `rgba(${r}, ${g}, ${b}, ${a})`;
 
   tick = tick === tickMax ? 0 : tick + 1;
 };
@@ -68,7 +72,7 @@ Events.onMainMenuEnter.addListener(() => {
     <element
       class="my-element"
       style="top: 64px; left: 64px; width: 0; height: 512px; background-image: url(media/textures/cat_pic.png)"
-      on-update={onUpdate}
+      onupdate={onUpdate}
     ></element>
   );
 
