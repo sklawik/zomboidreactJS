@@ -15,6 +15,7 @@
     "clean": "del-cli dist",
     "check": "prettier --check . && eslint .",
     "lint": "prettier --write . && eslint .",
+    "jab-watch": "tstl --watch --outDir C:/Users/jabdo/Zomboid/mods",
     "watch": "tstl --watch --outDir ~/Zomboid/mods"
   },
   "repository": {
