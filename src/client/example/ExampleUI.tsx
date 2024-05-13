@@ -64,7 +64,7 @@ const onUpdate: OptionalElementFunction = (element: PWUIElement) => {
  * Create and add the element here and to the UIManager.
  */
 Events.onMainMenuEnter.addListener(() => {
-  let element: PWUIElement = (
+  const element: PWUIElement = (
     <element
       class="my-element"
       style="top: 64px; left: 64px; width: 0; height: 512px; background-image: url(media/textures/cat_pic.png)"
