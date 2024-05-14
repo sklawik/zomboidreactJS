@@ -19,6 +19,7 @@ export class CachedValue<Type> {
   dirty: boolean;
   constructor(value: Type) {
     this.value = value;
+    this.dirty = true;
   }
 }
 
@@ -49,24 +50,45 @@ export class ElementCache {
   calculateDimensions(force: boolean) {
     const { element } = this;
     const { cssRuleset: style } = element;
+
+    // [CSS] - left
     this.x.value = formatNumValue(element, 'left', style.left);
+    if (this.x.value == null) {
+      if (element.parent != null) this.x.value = element.parent.cache.x.value;
+      else this.x.value = 0;
+    }
+
+    // [CSS] - top
     this.y.value = formatNumValue(element, 'top', style.top);
+    if (this.y.value == null) {
+      if (element.parent != null) this.y.value = element.parent.cache.y.value;
+      else this.y.value = 0;
+    }
+
+    // [CSS] - width
     this.width.value = formatNumValue(element, 'width', style.width);
+    if (this.width.value == null) {
+      this.width.value = Core.getInstance().getScreenWidth();
+    }
+
+    // [CSS] - height
     this.height.value = formatNumValue(element, 'height', style.height);
+    if (this.height.value == null) {
+      this.height.value = Core.getInstance().getScreenHeight();
+    }
   }
 
   calculateBackgroundColor(force: boolean) {
     if (!this.backgroundColor.dirty && !force) return;
 
     const { element } = this;
-    const { cssRuleset: style } = element;
+    const { cssRuleset } = element;
 
-    this.backgroundColor.value = formatColor(
-      element,
-      'background-color',
-      style['background-color']
-    );
-    this.backgroundColor.dirty = false;
+    if (this.backgroundColor.dirty) {
+      this.backgroundColor.value = formatColor(element, cssRuleset['background-color']);
+      this.backgroundColor.dirty = false;
+    }
+
   }
 
   calculateBackgroundImage(force: boolean) {
@@ -88,7 +110,6 @@ export class ElementCache {
 
 export const formatColor = (
   element: AbstractElement<string>,
-  property: string,
   value: string
 ): RGBA => {
   value = value.toLowerCase().trim();
@@ -124,7 +145,11 @@ export const formatNumValue = (
 ): number => {
   // TODO: Implement alternative lengths at scale.
   if (value.endsWith('px')) {
-    return tonumber(value.replace('px', ''));
+    let calcVal = tonumber(value.replace('px', ''));
+    if (element.parent != null) {
+      calcVal += element.parent.cache.x.value;
+    }
+    return calcVal;
   } else if (value.endsWith('%')) {
     let compare = 0;
     if (

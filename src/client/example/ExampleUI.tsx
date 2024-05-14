@@ -22,9 +22,9 @@ const maxWidth = 1024;
 const color: RGBA = asRGBA(255, 31, 31, 0, '255');
 
 const onUpdate: OptionalElementFunction = (e: Element) => {
-  
+
   const element: AbstractElement<string> = e as AbstractElement<string>;
-  
+
   // The lerp value stores the percentage value [0, 1] that will control how the animation calculates.
   let lerp;
 
@@ -69,11 +69,13 @@ const onUpdate: OptionalElementFunction = (e: Element) => {
  */
 Events.onMainMenuEnter.addListener(() => {
   const element: PWUIElement = (
-    <element
-      class="my-element"
-      style="top: 64px; left: 64px; width: 0; height: 512px; background-image: url(media/textures/cat_pic.png)"
-      onupdate={onUpdate}
-    ></element>
+      <element
+        class="my-element"
+        style="top: 64px; left: 64px; width: 471px; height: 512px; background-color: rgba(255,255,255,1); background-image: url(media/textures/cat_pic.png)"
+      // onupdate={onUpdate}
+      >
+        <text style="left: 16px">This is text.</text>
+      </element>
   );
 
   createUI(element);

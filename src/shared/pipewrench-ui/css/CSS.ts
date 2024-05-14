@@ -154,13 +154,18 @@ export class CSSRuleset {
   'max-width': MaxWidthRule | string = 'none';
   'max-height': MaxHeightRule | string = 'none';
 
-  'background-color': string = 'none';
+  'background-color': string = 'rgba(255,255,255,1)';
   'background-image': string = 'none';
 
-  constructor(raw?: SelectorBlock) {
-    if (raw != null) {
-      for (const property of Object.keys(raw)) {
-        (this as any)[property] = raw[property];
+  constructor(...rawBlocks: SelectorBlock[]) {
+    if (rawBlocks.length != 0) {
+      for (const raw of rawBlocks) {
+        if (raw != null) {
+          for (const property of Object.keys(raw)) {
+            (this as any)[property] = raw[property];
+            // print(`${property} => ${raw[property]}`);
+          }
+        }
       }
     }
   }

@@ -4,8 +4,10 @@
 
 import { IPWUIElementAttributes, PWUIElement } from './elements/PWUIElement';
 import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/PWUIRadialMenu';
-import { PWUITextArea as PWUITextArea } from './elements/Text';
+import { IPWUITextAreaAttributes, PWUIText } from './elements/PWUIText';
 import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
+
+import * as JSON from './JSON';
 
 /* ########################################################## */
 
@@ -15,6 +17,7 @@ declare global {
     interface IntrinsicElements {
       element: IPWUIElementAttributes;
       radialmenu: IPWUIRadialMenuAttributes;
+      text: IPWUITextAreaAttributes;
     }
   }
 }
@@ -23,7 +26,7 @@ declare global {
 export let primitives: { [name: string]: Element } = {
   element: PWUIElement,
   radialmenu: PWUIRadialMenu,
-  textarea: PWUITextArea,
+  text: PWUIText,
 };
 
 /* ########################################################## */
@@ -37,7 +40,10 @@ export namespace PipeWrenchUI {
     props = props ?? {};
     let flatChildren = flattenChildren(children);
     if (typeof t == 'string') {
-      assert(t in primitives, `No base element [${t}]!`);
+      if (primitives[t] == null) {
+        print(`No base element [${t}]!`);
+        return null;
+      }
       return new (primitives[t] as any)(props, flatChildren);
     } else if (isActualFunction(t)) {
       return t(props, flatChildren);
@@ -51,14 +57,20 @@ export namespace PipeWrenchUI {
     target: Element[]
   ): void {
     if (typeof children == 'string') {
-      target.push(new PWUITextArea({ text: children }));
-    } else {
-      try {
+      target.push(new PWUIText({}, target, children));
+    }
+    else if (typeof children == 'object') {
+      if (type(children) == 'table' && (children as any[])[0] != null) {
         for (const child of children as ElementChildren[]) {
           recursiveFlattenChildren(child, target);
         }
-      } catch (err) {
+      } else {
         target.push(children);
+      }
+    }
+    else {
+      for (const child of children as ElementChildren[]) {
+        recursiveFlattenChildren(child, target);
       }
     }
   }

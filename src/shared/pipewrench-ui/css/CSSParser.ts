@@ -11,8 +11,8 @@ export class CSSReader {
     throw new Error('Cannot instantiate CSSReader.');
   }
 
-  static parseInline(css: string): CSSRuleset {
-    return new CSSRuleset(this.readInlineSelectorBlock(css));
+  static parseInline(raw: {[rule: string]: string}, css: string): CSSRuleset {
+    return new CSSRuleset(raw, this.readInlineSelectorBlock(css));
   }
 
   static parse(css: string): CSSChain {
