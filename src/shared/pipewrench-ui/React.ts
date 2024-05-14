@@ -4,6 +4,7 @@
 
 import { IPWUIDivAttributes, PWUIDiv } from './elements/div';
 import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/radialmenu';
+import { PWUIRawText } from './elements/rawtext';
 import { IPWUISpanAttributes, PWUISpan } from './elements/span';
 import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
 
@@ -55,7 +56,7 @@ export namespace PipeWrenchUI {
     target: Element[]
   ): void {
     if (typeof children == 'string') {
-      target.push(new PWUISpan({}, target, children));
+      target.push(new PWUIRawText(children));
     }
     else if (typeof children == 'object') {
       if (type(children) == 'table' && (children as any[])[0] != null) {

@@ -1,21 +1,10 @@
-import { Element, UIElement } from '@asledgehammer/pipewrench';
-import { Props } from '../PipeWrenchUI';
-import { AbstractElement, IAbstractElementAttributes } from './AbstractElement';
-
-export const CSS_DEFAULT_RAW_TEXT = {
-  'background-color': 'transparent',
-  'color': 'rgba(255, 255, 255, 1)'
-};
-
-export interface IPWUIRawTextAttributes extends IAbstractElementAttributes { }
-
-export type RawTextProps = Props & {};
+import { UIElement } from '@asledgehammer/pipewrench';
+import { AbstractElement, CSS_DEFAULT_ELEMENT } from './AbstractElement';
 
 export class PWUIRawText extends AbstractElement<''> {
-
-  constructor(props: RawTextProps, children: Element[], text: string) {
-    super('', CSS_DEFAULT_RAW_TEXT, props, children);
+  constructor(text: string) {
+    super('', CSS_DEFAULT_ELEMENT, {}, []);
     this.javaObject = new UIElement(this);
-    this.text = text;
+    this.innerText = text;
   }
 }

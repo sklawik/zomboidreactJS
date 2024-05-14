@@ -6,8 +6,8 @@ export type ElementChildren = string | Element | ElementChildren[];
 export type Props = {};
 export type AnyProps = Props & { [prop: string]: any };
 export interface Element {
-  
+
 }
 export interface ElementConstructor {
-  new (props: any, children?: Element[]): Element;
+  new(props: any, children?: Element[]): Element;
 }

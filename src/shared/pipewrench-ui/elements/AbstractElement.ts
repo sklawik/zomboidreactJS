@@ -1,9 +1,13 @@
-import { ISUIElement, RadialMenu, UIElement, UIFont, UIManager } from "@asledgehammer/pipewrench";
+import { RadialMenu, UIElement, UIFont, UIManager } from "@asledgehammer/pipewrench";
 import { AnyProps, Element, OptionalElementFunction } from "../PipeWrenchUI";
 import { CSSRuleset } from "../css/CSS";
 import { CSSReader } from "../css/CSSParser";
 import { ElementCache } from "../ElementCache";
-import * as JSON from '../util/JSON';
+
+export const CSS_DEFAULT_ELEMENT = {
+    'background-color': 'transparent',
+    'color': 'rgba(0, 0, 0, 1)'
+};
 
 export interface IAbstractElementAttributes {
     style?: string;
@@ -18,7 +22,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
 
     tag: T;
 
-    text: string;
+    innerText: string;
 
     /** The internal Java Object that is the handle in Project Zomboid's UI engine. */
     javaObject: UIElement | RadialMenu;
@@ -137,7 +141,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
                 this.javaObject.setHeight(h);
 
                 this.renderBackground(x, y, w, h);
-                this.renderText(this.text, x, y, w, h);
+                this.renderText(this.innerText, x, y, w, h);
             }
         }
 

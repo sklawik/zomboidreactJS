@@ -69,13 +69,13 @@ const onUpdate: OptionalElementFunction = (e: Element) => {
  */
 Events.onMainMenuEnter.addListener(() => {
   const element: PWUIDiv = (
-      <div
-        class="my-element"
-        style="top: 64px; left: 64px; width: 471px; height: 512px; background-color: rgba(255,255,255,1); background-image: url(media/textures/cat_pic.png)"
-      // onupdate={onUpdate}
-      >
-        <span style="left: 16px">This is text.</span>
-      </div>
+    <div
+      class="my-element"
+      style="top: 64px; left: 64px; width: 471px; height: 512px; background-color: rgba(255,255,255,1); background-image: url(media/textures/cat_pic.png)"
+    // onupdate={onUpdate}
+    >
+      <span style="left: 16px">This is text.</span>
+    </div>
   );
 
   createUI(element);
