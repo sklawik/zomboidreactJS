@@ -2,12 +2,10 @@
 //
 //   URL: https://gist.github.com/probable-basilisk/3d1ff2c9a932c03cfb598f02678951c3
 
-import { IPWUIElementAttributes, PWUIElement } from './elements/PWUIElement';
-import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/PWUIRadialMenu';
-import { IPWUITextAreaAttributes, PWUIText } from './elements/PWUIText';
+import { IPWUIDivAttributes, PWUIDiv } from './elements/div';
+import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/radialmenu';
+import { IPWUISpanAttributes, PWUISpan } from './elements/span';
 import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
-
-import * as JSON from './JSON';
 
 /* ########################################################## */
 
@@ -15,18 +13,18 @@ import * as JSON from './JSON';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      element: IPWUIElementAttributes;
+      div: IPWUIDivAttributes;
+      span: IPWUISpanAttributes;
       radialmenu: IPWUIRadialMenuAttributes;
-      text: IPWUITextAreaAttributes;
     }
   }
 }
 
 // Element Classes.
 export let primitives: { [name: string]: Element } = {
-  element: PWUIElement,
+  div: PWUIDiv,
+  span: PWUISpan,
   radialmenu: PWUIRadialMenu,
-  text: PWUIText,
 };
 
 /* ########################################################## */
@@ -57,7 +55,7 @@ export namespace PipeWrenchUI {
     target: Element[]
   ): void {
     if (typeof children == 'string') {
-      target.push(new PWUIText({}, target, children));
+      target.push(new PWUISpan({}, target, children));
     }
     else if (typeof children == 'object') {
       if (type(children) == 'table' && (children as any[])[0] != null) {

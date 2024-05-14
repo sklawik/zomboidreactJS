@@ -1,11 +1,10 @@
 import { UIElement } from '@asledgehammer/pipewrench';
 import { AnyProps, Element } from '../PipeWrenchUI';
 import { AbstractElement, IAbstractElementAttributes } from './AbstractElement';
-import * as JSON from '../JSON';
 
-export interface IPWUIElementAttributes extends IAbstractElementAttributes { }
+export interface IPWUIDivAttributes extends IAbstractElementAttributes { }
 
-export const CSS_DEFAULTS_ELEMENT = {
+export const CSS_DEFAULT_DIV = {
   'background-color': 'transparent'
 };
 
@@ -14,16 +13,13 @@ export const CSS_DEFAULTS_ELEMENT = {
  *
  * @author JabDoesThings
  */
-export class PWUIElement extends AbstractElement<'element'> implements IPWUIElementAttributes {
+export class PWUIDiv extends AbstractElement<'div'> implements IPWUIDivAttributes {
 
-  tag: 'element' = 'element';
+  tag: 'div' = 'div';
 
   constructor(props: AnyProps, children: Element[]) {
-    super('element', CSS_DEFAULTS_ELEMENT, props, children);
+    super('div', CSS_DEFAULT_DIV, props, children);
     this.javaObject = new UIElement(this);
-
-    print('PWUIElement Children: ');
-    print(JSON.stringify(children));
   }
 
 }

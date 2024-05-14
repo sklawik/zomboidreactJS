@@ -2,8 +2,8 @@ import { ISUIElement, RadialMenu, UIElement, UIFont, UIManager } from "@asledgeh
 import { AnyProps, Element, OptionalElementFunction } from "../PipeWrenchUI";
 import { CSSRuleset } from "../css/CSS";
 import { CSSReader } from "../css/CSSParser";
-import { ElementCache } from "./ElementCache";
-import * as JSON from '../JSON';
+import { ElementCache } from "../ElementCache";
+import * as JSON from '../util/JSON';
 
 export interface IAbstractElementAttributes {
     style?: string;

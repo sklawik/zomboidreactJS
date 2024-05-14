@@ -7,7 +7,7 @@ import { easeInOut } from '../../shared/pipewrench-ui/css/math/Math';
 import { Element, OptionalElementFunction } from '../../shared/pipewrench-ui/PipeWrenchUI';
 import { PipeWrenchUI, createUI } from '../../shared/pipewrench-ui/React';
 import { AbstractElement } from '../../shared/pipewrench-ui/elements/AbstractElement';
-import { PWUIElement } from '../../shared/pipewrench-ui/elements/PWUIElement';
+import { PWUIDiv } from '../../shared/pipewrench-ui/elements/div';
 
 // This is the tick counter for keeping track of where in the cycle we are for the animation.
 let tick = 0;
@@ -68,14 +68,14 @@ const onUpdate: OptionalElementFunction = (e: Element) => {
  * Create and add the element here and to the UIManager.
  */
 Events.onMainMenuEnter.addListener(() => {
-  const element: PWUIElement = (
-      <element
+  const element: PWUIDiv = (
+      <div
         class="my-element"
         style="top: 64px; left: 64px; width: 471px; height: 512px; background-color: rgba(255,255,255,1); background-image: url(media/textures/cat_pic.png)"
       // onupdate={onUpdate}
       >
-        <text style="left: 16px">This is text.</text>
-      </element>
+        <span style="left: 16px">This is text.</span>
+      </div>
   );
 
   createUI(element);

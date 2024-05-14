@@ -10,9 +10,9 @@ import {
   parseRGBA,
   RGBA,
   transparent
-} from '../css/color/Color';
-import { TextureCache } from '../TextureCache';
-import { AbstractElement } from './AbstractElement';
+} from './css/color/Color';
+import { TextureCache } from './TextureCache';
+import { AbstractElement } from './elements/AbstractElement';
 
 export class CachedValue<Type> {
   value: Type;
