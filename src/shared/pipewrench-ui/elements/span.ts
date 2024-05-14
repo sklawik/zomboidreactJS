@@ -9,11 +9,11 @@ export const CSS_DEFAULT_SPAN = {
 
 export interface IPWUISpanAttributes extends IAbstractElementAttributes { }
 
-export type RawTextProps = Props & {};
+export type SpanProps = Props & {};
 
 export class PWUISpan extends AbstractElement<'span'> {
 
-  constructor(props: RawTextProps, children: Element[], text: string) {
+  constructor(props: SpanProps, children: Element[], text: string) {
     super('span', CSS_DEFAULT_SPAN, props, children);
     this.javaObject = new UIElement(this);
     this.text = text;
