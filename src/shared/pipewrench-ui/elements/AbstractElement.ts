@@ -84,7 +84,24 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
     /** (Java-side hook into the mock ISUIElement) */
     update2(): void {
 
-        // Check to see if this needs to be removed.
+        if (this.checkRemovalFlag()) return;
+
+        this.updateInternal();
+
+        // Calculate the values used by the element to position & render.
+        this.cache.calculate(this.tag, true);
+
+        if (this.onupdate) this.onupdate(this);
+
+        this.updateChildren();
+    }
+
+    protected updateInternal() { }
+
+    /**
+     * Check to see if this needs to be removed.
+     */
+    protected checkRemovalFlag(): boolean {
         if (this.flagToRemove) {
             if (this.parent && this.parent.children.length) {
                 const indexOf = this.parent.children.indexOf(this);
@@ -92,17 +109,16 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
                 this.parent = null;
             }
             this.flagToRemove = false;
-            return;
+            return true;
         }
 
-        // Calculate the values used by the element to position & render.
-        this.cache.calculate(true);
-        if (this.onupdate) this.onupdate(this);
+        return false;
+    }
 
-        // Render children.
+    protected updateChildren() {
         if (this.children.length != 0) {
             for (const child of this.children) {
-                child.update2();
+                if (child != null && child.update2 != null) child.update2();
             }
         }
     }
@@ -114,7 +130,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         // Pre-render children.
         if (this.children.length != 0) {
             for (const child of this.children) {
-                child.prerender();
+                if (child != null && child.prerender != null) child.prerender();
             }
         }
 
@@ -132,7 +148,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
 
             // No area to render, or missing data.
             if (x == null || y == null || w == null || w == 0 || h == null || h == 0) {
-                // print(`[${this.tag}] => x: ${x}, y: ${y}, w: ${w}, h: ${h}`);
+                print(`[${this.tag}] => x: ${x}, y: ${y}, w: ${w}, h: ${h}`);
             } else {
                 // Set dimensions.
                 this.javaObject.setX(x);
@@ -150,7 +166,8 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         // Render children.
         if (this.children.length != 0) {
             for (let index = 0; index < this.children.length; index++) {
-                this.children[index].render();
+                const child = this.children[index];
+                if (child != null && child.render != null) child.render();
             }
         }
     }
@@ -163,11 +180,13 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         const { value: backgroundColor } = this.cache.backgroundColor;
         const { value: texture } = this.cache.backgroundImage;
 
+        // print(texture);
+        // print(backgroundColor);
+
         if (texture != null) {
+            // (Only draw if the color isn't fully transparent)
             if (backgroundColor == null || backgroundColor.a != 0) {
-                // (Only draw if the color isn't fully transparent)
                 const { r, g, b, a } = backgroundColor;
-                // print(`${r} ${g} ${b} ${a}`);
                 this.javaObject.DrawTextureScaledColor(texture, x, y, w, h, r, g, b, a);
             }
         } else {
@@ -178,6 +197,15 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         }
     }
 
+    /**
+     * @param text 
+     * @param x 
+     * @param y 
+     * @param w 
+     * @param h 
+     * 
+     * @returns 
+     */
     protected renderText(text: string, x: number, y: number, w: number, h: number) {
         if (this.javaObject == null) return;
         if (text != null && text.length != 0) {

@@ -3,6 +3,7 @@
 //   URL: https://gist.github.com/probable-basilisk/3d1ff2c9a932c03cfb598f02678951c3
 
 import { IPWUIDivAttributes, PWUIDiv } from './elements/div';
+import { IPWUIImageAttributes, PWUIImg } from './elements/img';
 import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/radialmenu';
 import { PWUIRawText } from './elements/rawtext';
 import { IPWUISpanAttributes, PWUISpan } from './elements/span';
@@ -16,6 +17,7 @@ declare global {
     interface IntrinsicElements {
       div: IPWUIDivAttributes;
       span: IPWUISpanAttributes;
+      img: IPWUIImageAttributes;
       radialmenu: IPWUIRadialMenuAttributes;
     }
   }
@@ -25,6 +27,7 @@ declare global {
 export let primitives: { [name: string]: Element } = {
   div: PWUIDiv,
   span: PWUISpan,
+  img: PWUIImg,
   radialmenu: PWUIRadialMenu,
 };
 

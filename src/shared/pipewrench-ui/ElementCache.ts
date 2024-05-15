@@ -13,6 +13,7 @@ import {
 } from './css/color/Color';
 import { TextureCache } from './TextureCache';
 import { AbstractElement } from './elements/AbstractElement';
+import { PWUIImg } from './elements/img';
 
 export class CachedValue<Type> {
   value: Type;
@@ -41,13 +42,16 @@ export class ElementCache {
    *
    * @param force If true, render every value regardless of their dirty states.
    */
-  calculate(force: boolean = false) {
-    this.calculateDimensions(force);
-    this.calculateBackgroundColor(force);
-    this.calculateBackgroundImage(force);
+  calculate(tag: string, force: boolean = false) {
+
+    this.calculateBackgroundColor(tag, force);
+    // Calculate background-image before dimensions for <img> elements.
+    this.calculateBackgroundImage(tag, force);
+
+    this.calculateDimensions(tag, force);
   }
 
-  calculateDimensions(force: boolean) {
+  calculateDimensions(tag: string, force: boolean) {
     const { element } = this;
     const { cssRuleset: style } = element;
 
@@ -68,30 +72,55 @@ export class ElementCache {
     // [CSS] - width
     this.width.value = formatNumValue(element, 'width', style.width);
     if (this.width.value == null) {
-      this.width.value = Core.getInstance().getScreenWidth();
+      if (tag == 'img') {
+        const img = element as PWUIImg;
+        if (img.width != null) {
+          this.width.value = img.width;
+        }
+        else if (this.backgroundImage.value != null) {
+          this.width.value = this.backgroundImage.value.getWidth();
+        } else {
+          this.width.value = 0;
+        }
+      } else {
+        this.width.value = 0;
+      }
     }
 
     // [CSS] - height
     this.height.value = formatNumValue(element, 'height', style.height);
     if (this.height.value == null) {
-      this.height.value = Core.getInstance().getScreenHeight();
+      if (tag == 'img') {
+        const img = element as PWUIImg;
+        if (img.height != null) {
+          this.height.value = img.height;
+        }
+        else if (this.backgroundImage.value != null) {
+          this.height.value = this.backgroundImage.value.getHeight();
+        } else {
+          this.height.value = 0;
+        }
+      } else {
+        this.height.value = 0;
+      }
     }
+
   }
 
-  calculateBackgroundColor(force: boolean) {
+  calculateBackgroundColor(tag: string, force: boolean) {
     if (!this.backgroundColor.dirty && !force) return;
 
     const { element } = this;
     const { cssRuleset } = element;
 
-    if (this.backgroundColor.dirty) {
+    if (force || this.backgroundColor.dirty) {
       this.backgroundColor.value = formatColor(element, cssRuleset['background-color']);
       this.backgroundColor.dirty = false;
     }
 
   }
 
-  calculateBackgroundImage(force: boolean) {
+  calculateBackgroundImage(tag: string, force: boolean) {
     if (!this.backgroundColor.dirty && !force) return;
 
     const { element } = this;
@@ -101,6 +130,15 @@ export class ElementCache {
     if (backgroundImage != null && backgroundImage.indexOf('url(') !== -1) {
       backgroundImage = backgroundImage.replace('url(', '').replace(')', '');
       this.backgroundImage.value = TextureCache.getOrLoad(backgroundImage);
+    }
+    // If <img>, check src="" attribute.
+    else if (tag == 'img') {
+      const img = element as PWUIImg;
+      if (img.src != null && img.src.length != 0) {
+        this.backgroundImage.value = TextureCache.getOrLoad(img.src);
+      } else {
+        this.backgroundImage.value = null;
+      }
     } else {
       this.backgroundImage.value = null;
     }
