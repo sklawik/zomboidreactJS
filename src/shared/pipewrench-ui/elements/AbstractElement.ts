@@ -2,7 +2,10 @@ import { RadialMenu, UIElement, UIFont, UIManager } from "@asledgehammer/pipewre
 import { AnyProps, Element, OptionalElementFunction } from "../PipeWrenchUI";
 import { CSSRuleset } from "../css/CSS";
 import { CSSReader } from "../css/CSSParser";
-import { ElementCache } from "../ElementCache";
+import { PWUIImg } from "./img";
+import { TextureCache } from "../TextureCache";
+import { formatColor, formatNumValue } from "../util/Format";
+import { ElementCache } from "../cache";
 
 export const CSS_DEFAULT_ELEMENT = {
     'background-color': 'transparent',
@@ -89,7 +92,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         this.updateInternal();
 
         // Calculate the values used by the element to position & render.
-        this.cache.calculate(this.tag, true);
+        this.calculate(true);
 
         if (this.onupdate) this.onupdate(this);
 
@@ -121,6 +124,113 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
                 if (child != null && child.update2 != null) child.update2();
             }
         }
+    }
+
+    calculate(force: boolean) {
+        this.calculateBackgroundColor(force);
+        // Calculate background-image before dimensions for <img> elements.
+        this.calculateBackgroundImage(force);
+
+        this.calculateDimensions(force);
+    }
+
+    calculateDimensions(force: boolean) {
+        const element = this;
+        const { cache, cssRuleset: style, tag } = this;
+
+        // [CSS] - width
+        let width = formatNumValue(element, 'width', style.width);
+        if (width == null) {
+            if (tag == 'img') {
+                const img = (element as any) as PWUIImg;
+                if (img.width != null) {
+                    width = img.width;
+                }
+                else if (cache.backgroundImage.value != null) {
+                    width = cache.backgroundImage.value.getWidth();
+                } else {
+                    width = 0;
+                }
+            } else {
+                width = 0;
+            }
+        }
+
+        // [CSS] - height
+        let height = formatNumValue(element, 'height', style.height);
+        if (height == null) {
+            if (tag == 'img') {
+                const img = (element as any) as PWUIImg;
+                if (img.height != null) {
+                    height = img.height;
+                }
+                else if (cache.backgroundImage.value != null) {
+                    height = cache.backgroundImage.value.getHeight();
+                } else {
+                    height = 0;
+                }
+            } else {
+                height = 0;
+            }
+        }
+
+        cache.outer.x2 = cache.outer.x1 + width;
+        cache.outer.y2 = cache.outer.y1 + height;
+        cache.width.value = width;
+        cache.height.value = height;
+
+        // [CSS] - left
+        cache.outer.x1 = formatNumValue(element, 'left', style.left);
+        if (cache.outer.x1 == null) {
+            if (element.parent != null) cache.outer.x1 = element.parent.cache.outer.x1;
+            else cache.outer.x1 = 0;
+        }
+
+        // [CSS] - top
+        cache.outer.y1 = formatNumValue(element, 'top', style.top);
+        if (cache.outer.y1 == null) {
+            if (element.parent != null) cache.outer.y1 = element.parent.cache.outer.y1;
+            else cache.outer.y1 = 0;
+        }
+    }
+
+    calculateBackgroundColor(force: boolean) {
+        const element  = this;
+        const { cache, cssRuleset } = this;
+
+        if (!cache.backgroundColor.dirty && !force) return;
+
+        if (force || cache.backgroundColor.dirty) {
+            cache.backgroundColor.value = formatColor(element, cssRuleset['background-color']);
+            cache.backgroundColor.dirty = false;
+        }
+
+    }
+
+    calculateBackgroundImage(force: boolean) {
+
+        const element  = this;
+        const { cache, cssRuleset, tag } = this;
+
+        if (!cache.backgroundColor.dirty && !force) return;
+
+        let backgroundImage = cssRuleset['background-image'];
+        if (backgroundImage != null && backgroundImage.indexOf('url(') !== -1) {
+            backgroundImage = backgroundImage.replace('url(', '').replace(')', '');
+            cache.backgroundImage.value = TextureCache.getOrLoad(backgroundImage);
+        }
+        // If <img>, check src="" attribute.
+        else if (tag == 'img') {
+            const img = (element as any) as PWUIImg;
+            if (img.src != null && img.src.length != 0) {
+                cache.backgroundImage.value = TextureCache.getOrLoad(img.src);
+            } else {
+                cache.backgroundImage.value = null;
+            }
+        } else {
+            cache.backgroundImage.value = null;
+        }
+        cache.backgroundImage.dirty = false;
     }
 
     /** (Java-side hook into the mock ISUIElement) */
