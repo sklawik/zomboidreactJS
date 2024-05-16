@@ -15,7 +15,11 @@ import { TextureCache } from './TextureCache';
 import { AbstractElement } from './elements/AbstractElement';
 import { PWUIImg } from './elements/img';
 
-export class CachedValue<Type> {
+export interface Cached {
+  dirty: boolean;
+}
+
+export class CachedValue<Type> implements Cached {
   value: Type;
   dirty: boolean;
   constructor(value: Type) {
@@ -24,15 +28,37 @@ export class CachedValue<Type> {
   }
 }
 
+export class CachedRectangle implements Cached {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  dirty: boolean;
+
+  constructor(x1: number, y1: number, x2: number, y2: number) {
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+  }
+}
+
 export class ElementCache {
   element: AbstractElement<string>;
 
-  x: CachedValue<number> = new CachedValue(0);
-  y: CachedValue<number> = new CachedValue(0);
+  inner: CachedRectangle = new CachedRectangle(0, 0, 0, 0);
+  outer: CachedRectangle = new CachedRectangle(0, 0, 0, 0);
+
+  // x: CachedValue<number> = new CachedValue(0);
+  // y: CachedValue<number> = new CachedValue(0);
   width: CachedValue<number> = new CachedValue(0);
   height: CachedValue<number> = new CachedValue(0);
   backgroundColor: CachedValue<RGBA> = new CachedValue(asRGBA(0, 0, 0, 0, '1'));
   backgroundImage: CachedValue<Texture> = new CachedValue(null);
+
+  padding: {
+
+  }
 
   constructor(element: AbstractElement<string>) {
     this.element = element;
@@ -55,56 +81,60 @@ export class ElementCache {
     const { element } = this;
     const { cssRuleset: style } = element;
 
-    // [CSS] - left
-    this.x.value = formatNumValue(element, 'left', style.left);
-    if (this.x.value == null) {
-      if (element.parent != null) this.x.value = element.parent.cache.x.value;
-      else this.x.value = 0;
-    }
-
-    // [CSS] - top
-    this.y.value = formatNumValue(element, 'top', style.top);
-    if (this.y.value == null) {
-      if (element.parent != null) this.y.value = element.parent.cache.y.value;
-      else this.y.value = 0;
-    }
-
     // [CSS] - width
-    this.width.value = formatNumValue(element, 'width', style.width);
-    if (this.width.value == null) {
+    let width = formatNumValue(element, 'width', style.width);
+    if (width == null) {
       if (tag == 'img') {
         const img = element as PWUIImg;
         if (img.width != null) {
-          this.width.value = img.width;
+          width = img.width;
         }
         else if (this.backgroundImage.value != null) {
-          this.width.value = this.backgroundImage.value.getWidth();
+          width = this.backgroundImage.value.getWidth();
         } else {
-          this.width.value = 0;
+          width = 0;
         }
       } else {
-        this.width.value = 0;
+        width = 0;
       }
     }
 
     // [CSS] - height
-    this.height.value = formatNumValue(element, 'height', style.height);
-    if (this.height.value == null) {
+    let height = formatNumValue(element, 'height', style.height);
+    if (height == null) {
       if (tag == 'img') {
         const img = element as PWUIImg;
         if (img.height != null) {
-          this.height.value = img.height;
+          height = img.height;
         }
         else if (this.backgroundImage.value != null) {
-          this.height.value = this.backgroundImage.value.getHeight();
+          height = this.backgroundImage.value.getHeight();
         } else {
-          this.height.value = 0;
+          height = 0;
         }
       } else {
-        this.height.value = 0;
+        height = 0;
       }
     }
 
+    this.outer.x2 = this.outer.x1 + width;
+    this.outer.y2 = this.outer.y1 + height;
+    this.width.value = width;
+    this.height.value = height;
+
+    // [CSS] - left
+    this.outer.x1 = formatNumValue(element, 'left', style.left);
+    if (this.outer.x1 == null) {
+      if (element.parent != null) this.outer.x1 = element.parent.cache.outer.x1;
+      else this.outer.x1 = 0;
+    }
+
+    // [CSS] - top
+    this.outer.y1 = formatNumValue(element, 'top', style.top);
+    if (this.outer.y1 == null) {
+      if (element.parent != null) this.outer.y1 = element.parent.cache.outer.y1;
+      else this.outer.y1 = 0;
+    }
   }
 
   calculateBackgroundColor(tag: string, force: boolean) {
@@ -185,7 +215,15 @@ export const formatNumValue = (
   if (value.endsWith('px')) {
     let calcVal = tonumber(value.replace('px', ''));
     if (element.parent != null) {
-      calcVal += element.parent.cache.x.value;
+      if (property === 'left') {
+        calcVal += element.parent.cache.outer.x1;
+      } else if (property == 'right') {
+        calcVal = element.parent.cache.outer.x2 - (calcVal - element.cache.width.value);
+      } else if (property == 'top') {
+        calcVal += element.parent.cache.outer.y1;
+      } else if (property == 'bottom') {
+        calcVal = element.parent.cache.outer.y2 - (calcVal - element.cache.height.value);
+      }
     }
     return calcVal;
   } else if (value.endsWith('%')) {

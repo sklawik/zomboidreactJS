@@ -141,8 +141,8 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
     render(): void {
         // print(`[${this.tag}] => render()`);
         if (this.javaObject != null) {
-            const x = this.cache.x.value;
-            const y = this.cache.y.value;
+            const x = this.cache.outer.x1;
+            const y = this.cache.outer.y1;
             const w = this.cache.width.value;
             const h = this.cache.height.value;
 
