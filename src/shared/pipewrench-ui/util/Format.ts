@@ -5,10 +5,10 @@ import { parseHEX } from "../css/color/HEX";
 import { HSL_2_RGB, parseHSL } from "../css/color/HSL";
 import { parseRGB } from "../css/color/RGB";
 import { RGBA, parseRGBA } from "../css/color/RGBA";
-import { AbstractElement } from "../elements/AbstractElement";
+import { HTMLElement } from "../html/HTMLElement";
 
 export const formatColor = (
-    element: AbstractElement<string>,
+    element: HTMLElement<string>,
     value: string
 ): RGBA => {
     value = value.toLowerCase().trim();
@@ -38,7 +38,7 @@ export const formatColor = (
 };
 
 export const formatNumValue = (
-    element: AbstractElement<string>,
+    element: HTMLElement<string>,
     property: string,
     value: string
 ): number => {

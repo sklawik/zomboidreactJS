@@ -1,13 +1,21 @@
-import { AbstractElement } from "./elements/AbstractElement";
+import { onFrontEndTick, onMainMenuEnter, onTickEvenPaused } from "@asledgehammer/pipewrench-events";
+import { HTMLDocument } from "./html/elements/html";
+import { Window } from "./Window";
+import { initPZ } from "./html/PZ";
 
-export type OptionalElementFunction = (element: Element) => void;
-export type ElementFactory = (props: Props, children?: Element[]) => Element;
-export type ElementChildren = string | Element | ElementChildren[];
-export type Props = {};
-export type AnyProps = Props & { [prop: string]: any };
-export interface Element {
+export let window: Window = new Window();
+export let document: HTMLDocument = new HTMLDocument({}, []);
 
-}
-export interface ElementConstructor {
-  new(props: any, children?: Element[]): Element;
-}
+onMainMenuEnter.addListener(() => {
+
+  function update() {
+    window.update();
+    document.update2();
+  }
+
+  // initPZ();
+
+  // (The main menu has a separate tick from in-game)
+  onFrontEndTick.addListener(update);
+  onTickEvenPaused.addListener(update);
+});

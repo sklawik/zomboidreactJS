@@ -1,6 +1,6 @@
 import { Texture } from "@asledgehammer/pipewrench";
 import { RGBA, asRGBA } from "./css/color/RGBA";
-import { AbstractElement } from "./elements/AbstractElement";
+import { HTMLElement } from "./html/HTMLElement";
 
 export interface Cached {
     dirty: boolean;
@@ -31,7 +31,7 @@ export class CachedRectangle implements Cached {
 }
 
 export class ElementCache {
-    element: AbstractElement<string>;
+    element: HTMLElement<string>;
 
     /* (Dimensions) */
     inner: CachedRectangle = new CachedRectangle(0, 0, 0, 0);
@@ -43,11 +43,7 @@ export class ElementCache {
     backgroundColor: CachedValue<RGBA> = new CachedValue(asRGBA(0, 0, 0, 0, '1'));
     backgroundImage: CachedValue<Texture> = new CachedValue(null);
 
-    padding: {
-
-    }
-
-    constructor(element: AbstractElement<string>) {
+    constructor(element: HTMLElement<string>) {
         this.element = element;
     }
 }

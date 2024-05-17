@@ -1,18 +1,19 @@
-import { RadialMenu, UIElement, UIFont, UIManager } from "@asledgehammer/pipewrench";
-import { AnyProps, Element, OptionalElementFunction } from "../PipeWrenchUI";
+import { UIFont } from "@asledgehammer/pipewrench";
 import { CSSRuleset } from "../css/CSS";
 import { CSSReader } from "../css/CSSParser";
-import { PWUIImg } from "./img";
+import { HTMLImageElement } from "./elements/img";
 import { TextureCache } from "../TextureCache";
 import { formatColor, formatNumValue } from "../util/Format";
-import { ElementCache } from "../cache";
+import { AnyProps, ReactElement, OptionalElementFunction } from "../React";
+import { ElementCache } from "../Cache";
+import { getUIElement } from "./PZ";
 
 export const CSS_DEFAULT_ELEMENT = {
     'background-color': 'transparent',
     'color': 'rgba(0, 0, 0, 1)'
 };
 
-export interface IAbstractElementAttributes {
+export interface IHTMLElementAttributes {
     style?: string;
     class?: string;
     id?: string;
@@ -21,14 +22,11 @@ export interface IAbstractElementAttributes {
     onrender?: OptionalElementFunction;
 }
 
-export abstract class AbstractElement<T extends string> implements Element, IAbstractElementAttributes {
+export abstract class HTMLElement<T extends string> implements ReactElement, IHTMLElementAttributes {
 
     tag: T;
 
     innerText: string;
-
-    /** The internal Java Object that is the handle in Project Zomboid's UI engine. */
-    javaObject: UIElement | RadialMenu;
 
     /** The class names assigned to the element. */
     class?: string;
@@ -41,13 +39,14 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
     readonly cssRulesetDefault: { [rule: string]: string };
     style?: string;
 
-    onupdate?: ((element: Element) => void);
-    onprerender?: ((element: Element) => void);
-    onrender?: ((element: Element) => void);
+    onupdate?: ((element: ReactElement) => void);
+    onprerender?: ((element: ReactElement) => void);
+    onrender?: ((element: ReactElement) => void);
 
     /** The children assigned to the element. */
-    readonly children: AbstractElement<string>[] = [];
-    parent?: AbstractElement<string>;
+    readonly children: HTMLElement<string>[] = [];
+
+    parent?: HTMLElement<string>;
 
     private _dirty: boolean = true;
 
@@ -55,7 +54,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
 
     flagToRemove: boolean = false;
 
-    constructor(tag: T, defaultCSS: { [rule: string]: string }, props: AnyProps, children: Element[]) {
+    constructor(tag: T, defaultCSS: { [rule: string]: string }, props: AnyProps, children: ReactElement[]) {
         this.tag = tag;
         this.cssRulesetDefault = defaultCSS;
         this.cache = new ElementCache(this);
@@ -77,25 +76,18 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         // Handle children.
         if (children && children.length) {
             for (let index = 0; index < children.length; index++) {
-                const child = children[index] as AbstractElement<string>;
-                this.children.push(child);
-                child.parent = this;
+                const child = children[index] as HTMLElement<string>;
+                this.appendChild(child);
             }
         }
     }
 
     /** (Java-side hook into the mock ISUIElement) */
     update2(): void {
-
         if (this.checkRemovalFlag()) return;
-
         this.updateInternal();
-
-        // Calculate the values used by the element to position & render.
         this.calculate(true);
-
         if (this.onupdate) this.onupdate(this);
-
         this.updateChildren();
     }
 
@@ -114,14 +106,18 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
             this.flagToRemove = false;
             return true;
         }
-
         return false;
     }
 
     protected updateChildren() {
         if (this.children.length != 0) {
-            for (const child of this.children) {
-                if (child != null && child.update2 != null) child.update2();
+            for (let index = 0; index < this.children.length; index++) {
+                const child = this.children[index];
+                if (child != null) {
+                    // (Update parent reference for manual children assignments third-party..)
+                    if (child.parent != this) child.parent = this;
+                    if (child.update2 != null) child.update2();
+                }
             }
         }
     }
@@ -130,7 +126,6 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         this.calculateBackgroundColor(force);
         // Calculate background-image before dimensions for <img> elements.
         this.calculateBackgroundImage(force);
-
         this.calculateDimensions(force);
     }
 
@@ -142,7 +137,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         let width = formatNumValue(element, 'width', style.width);
         if (width == null) {
             if (tag == 'img') {
-                const img = (element as any) as PWUIImg;
+                const img = (element as any) as HTMLImageElement;
                 if (img.width != null) {
                     width = img.width;
                 }
@@ -160,7 +155,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         let height = formatNumValue(element, 'height', style.height);
         if (height == null) {
             if (tag == 'img') {
-                const img = (element as any) as PWUIImg;
+                const img = (element as any) as HTMLImageElement;
                 if (img.height != null) {
                     height = img.height;
                 }
@@ -195,7 +190,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
     }
 
     calculateBackgroundColor(force: boolean) {
-        const element  = this;
+        const element = this;
         const { cache, cssRuleset } = this;
 
         if (!cache.backgroundColor.dirty && !force) return;
@@ -209,7 +204,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
 
     calculateBackgroundImage(force: boolean) {
 
-        const element  = this;
+        const element = this;
         const { cache, cssRuleset, tag } = this;
 
         if (!cache.backgroundColor.dirty && !force) return;
@@ -221,7 +216,7 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         }
         // If <img>, check src="" attribute.
         else if (tag == 'img') {
-            const img = (element as any) as PWUIImg;
+            const img = (element as any) as HTMLImageElement;
             if (img.src != null && img.src.length != 0) {
                 cache.backgroundImage.value = TextureCache.getOrLoad(img.src);
             } else {
@@ -233,46 +228,52 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         cache.backgroundImage.dirty = false;
     }
 
-    /** (Java-side hook into the mock ISUIElement) */
+    /**
+     * (Executed on the render thread)
+     */
     prerender(): void {
+        this.prerenderInternal();
         if (this.onprerender) this.onprerender(this);
+        this.prerenderChildren();
+        this._dirty = false;
+    }
 
-        // Pre-render children.
+    prerenderInternal(): void {
+
+    }
+
+    prerenderChildren(): void {
         if (this.children.length != 0) {
-            for (const child of this.children) {
+            for (let index = 0; index < this.children.length; index++) {
+                const child = this.children[index];
                 if (child != null && child.prerender != null) child.prerender();
             }
         }
-
-        this._dirty = false;
     }
 
     /** (Java-side hook into the mock ISUIElement) */
     render(): void {
-        // print(`[${this.tag}] => render()`);
-        if (this.javaObject != null) {
-            const x = this.cache.outer.x1;
-            const y = this.cache.outer.y1;
-            const w = this.cache.width.value;
-            const h = this.cache.height.value;
 
-            // No area to render, or missing data.
-            if (x == null || y == null || w == null || w == 0 || h == null || h == 0) {
-                print(`[${this.tag}] => x: ${x}, y: ${y}, w: ${w}, h: ${h}`);
-            } else {
-                // Set dimensions.
-                this.javaObject.setX(x);
-                this.javaObject.setY(y);
-                this.javaObject.setWidth(w);
-                this.javaObject.setHeight(h);
-
-                this.renderBackground(x, y, w, h);
-                this.renderText(this.innerText, x, y, w, h);
-            }
+        const x = this.cache.outer.x1;
+        const y = this.cache.outer.y1;
+        const w = this.cache.width.value;
+        const h = this.cache.height.value;
+        // No area to render, or missing data.
+        if (x == null || y == null || w == null || w == 0 || h == null || h == 0) {
+            // print(`[${this.tag}] => x: ${x}, y: ${y}, w: ${w}, h: ${h}`);
+        } else {
+            this.renderBackground(x, y, w, h);
+            this.renderText(this.innerText, x, y, w, h);
         }
 
+        this.renderInternal();
         if (this.onrender) this.onrender(this);
+        this.renderChildren();
+    }
 
+    renderInternal(): void { }
+
+    renderChildren(): void {
         // Render children.
         if (this.children.length != 0) {
             for (let index = 0; index < this.children.length; index++) {
@@ -284,42 +285,31 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
 
     protected renderBackground(x: number, y: number, w: number, h: number) {
 
-        if (this.javaObject == null) return;
+        const javaObject = getUIElement();
 
         // Draw the background of the element.
         const { value: backgroundColor } = this.cache.backgroundColor;
         const { value: texture } = this.cache.backgroundImage;
 
-        // print(texture);
-        // print(backgroundColor);
-
         if (texture != null) {
             // (Only draw if the color isn't fully transparent)
             if (backgroundColor == null || backgroundColor.a != 0) {
                 const { r, g, b, a } = backgroundColor;
-                this.javaObject.DrawTextureScaledColor(texture, x, y, w, h, r, g, b, a);
+                javaObject.DrawTextureScaledColor(texture, x, y, w, h, r, g, b, a);
             }
         } else {
             if (backgroundColor == null || backgroundColor.a != 0) {
                 const { r, g, b, a } = backgroundColor;
-                this.javaObject.DrawTextureScaledColor(null, x, y, w, h, r, g, b, a);
+                javaObject.DrawTextureScaledColor(null, x, y, w, h, r, g, b, a);
             }
         }
     }
 
-    /**
-     * @param text 
-     * @param x 
-     * @param y 
-     * @param w 
-     * @param h 
-     * 
-     * @returns 
-     */
     protected renderText(text: string, x: number, y: number, w: number, h: number) {
-        if (this.javaObject == null) return;
+        const javaObject = getUIElement();
+
         if (text != null && text.length != 0) {
-            this.javaObject.DrawText(UIFont.Large, text, x, y, 1, 1, 1, 1);
+            javaObject.DrawText(UIFont.Large, text, x, y, 1, 1, 1, 1);
         }
     }
 
@@ -330,8 +320,31 @@ export abstract class AbstractElement<T extends string> implements Element, IAbs
         this._dirty = true;
     }
 
-    addToUIManager() {
-        UIManager.AddUI(this.javaObject);
+    appendChild(aChild: HTMLElement<string>) {
+
+        // (Sanity check)
+        if (aChild == null) return;
+
+        // If the element is already a child, then remove it and append to the end. 
+        if (aChild.parent == this) {
+            const index = this.children.indexOf(aChild);
+            if (index != -1) this.children.splice(index, 1);
+        }
+
+        // First, check the prior parental status.
+        if (aChild.parent != null) aChild.parent.removeChild(aChild);
+
+        // Next, add the child to this element.
+        aChild.parent = this;
+        this.children.push(aChild);
+    }
+
+    removeChild(child: HTMLElement<string>) {
+        const index = this.children.indexOf(child);
+        if (index == -1) throw new Error('Element is not a child.');
+
+        child.parent = null;
+        this.children.splice(index, 1);
     }
 
     /**

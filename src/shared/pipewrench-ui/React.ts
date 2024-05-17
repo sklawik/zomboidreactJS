@@ -2,12 +2,26 @@
 //
 //   URL: https://gist.github.com/probable-basilisk/3d1ff2c9a932c03cfb598f02678951c3
 
-import { IPWUIDivAttributes, PWUIDiv } from './elements/div';
-import { IPWUIImageAttributes, PWUIImg } from './elements/img';
-import { IPWUIRadialMenuAttributes, PWUIRadialMenu } from './elements/radialmenu';
-import { PWUIRawText } from './elements/rawtext';
-import { IPWUISpanAttributes, PWUISpan } from './elements/span';
-import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
+import { HTMLBodyElement, BodyAttributes } from './html/elements/body';
+import { DivAttributes, HTMLDivElement } from './html/elements/div';
+import { ImageAttributes, HTMLImageElement } from './html/elements/img';
+import { RadialMenuAttributes, HTMLRadialMenu } from './html/elements/radialmenu';
+import { HTMLRawText } from './html/elements/rawtext';
+import { SpanAttributes, HTMLSpanElement } from './html/elements/span';
+
+/* ########################################################## */
+
+export type OptionalElementFunction = (element: ReactElement) => void;
+export type ReactElementFactory = (props: Props, children?: ReactElement[]) => ReactElement;
+export type ReactElementChildren = string | ReactElement | ReactElementChildren[];
+export type Props = {};
+export type AnyProps = Props & { [prop: string]: any };
+export interface ReactElement {
+
+}
+export interface ElementConstructor {
+  new(props: any, children?: ReactElement[]): ReactElement;
+}
 
 /* ########################################################## */
 
@@ -15,20 +29,22 @@ import { Element, ElementChildren, ElementConstructor } from './PipeWrenchUI';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      div: IPWUIDivAttributes;
-      span: IPWUISpanAttributes;
-      img: IPWUIImageAttributes;
-      radialmenu: IPWUIRadialMenuAttributes;
+      body: BodyAttributes;
+      div: DivAttributes;
+      span: SpanAttributes;
+      img: ImageAttributes;
+      radialmenu: RadialMenuAttributes;
     }
   }
 }
 
 // Element Classes.
-export let primitives: { [name: string]: Element } = {
-  div: PWUIDiv,
-  span: PWUISpan,
-  img: PWUIImg,
-  radialmenu: PWUIRadialMenu,
+export let primitives: { [name: string]: ReactElement } = {
+  body: HTMLBodyElement,
+  div: HTMLDivElement,
+  span: HTMLSpanElement,
+  img: HTMLImageElement,
+  radialmenu: HTMLRadialMenu,
 };
 
 /* ########################################################## */
@@ -55,15 +71,15 @@ export namespace PipeWrenchUI {
   };
 
   function recursiveFlattenChildren(
-    children: ElementChildren,
-    target: Element[]
+    children: ReactElementChildren,
+    target: ReactElement[]
   ): void {
     if (typeof children == 'string') {
-      target.push(new PWUIRawText(children));
+      target.push(new HTMLRawText(children));
     }
     else if (typeof children == 'object') {
       if (type(children) == 'table' && (children as any[])[0] != null) {
-        for (const child of children as ElementChildren[]) {
+        for (const child of children as ReactElementChildren[]) {
           recursiveFlattenChildren(child, target);
         }
       } else {
@@ -71,14 +87,14 @@ export namespace PipeWrenchUI {
       }
     }
     else {
-      for (const child of children as ElementChildren[]) {
+      for (const child of children as ReactElementChildren[]) {
         recursiveFlattenChildren(child, target);
       }
     }
   }
 
-  function flattenChildren(children: ElementChildren): Element[] {
-    let result: Element[] = [];
+  function flattenChildren(children: ReactElementChildren): ReactElement[] {
+    let result: ReactElement[] = [];
     recursiveFlattenChildren(children, result);
     return result;
   }
@@ -90,10 +106,10 @@ export namespace PipeWrenchUI {
   }
 }
 
-export const createUI = (...elements: Element[]) => {
-  for (const element of elements) {
-    if ((element as any).addToUIManager != null) {
-      (element as any).addToUIManager();
-    }
-  }
-};
+// export function createElement(...elements: ReactElement[]) {
+//   for (const element of elements) {
+//     if ((element as any).addToUIManager != null) {
+//       (element as any).addToUIManager();
+//     }
+//   }
+// };
