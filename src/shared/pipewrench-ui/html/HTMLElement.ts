@@ -7,6 +7,11 @@ import { formatColor, formatNumValue } from "../util/Format";
 import { AnyProps, ReactElement, OptionalElementFunction } from "../React";
 import { ElementCache } from "../Cache";
 import { getUIElement } from "./PZ";
+import { AddEventListenerOptions, EventListener, EventTarget, RemoveEventListenerOptions } from "../event/EventTarget";
+import { Event } from "../event/Event";
+
+import * as JSON from '../util/JSON';
+import { tPrint } from "../util/table";
 
 export const CSS_DEFAULT_ELEMENT = {
     'background-color': 'transparent',
@@ -22,7 +27,7 @@ export interface IHTMLElementAttributes {
     onrender?: OptionalElementFunction;
 }
 
-export abstract class HTMLElement<T extends string> implements ReactElement, IHTMLElementAttributes {
+export abstract class HTMLElement<T extends string> implements ReactElement, IHTMLElementAttributes, EventTarget {
 
     tag: T;
 
@@ -54,10 +59,18 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
 
     flagToRemove: boolean = false;
 
+    readonly listeners: { [type: string]: EventListener[] } = {};
+
     constructor(tag: T, defaultCSS: { [rule: string]: string }, props: AnyProps, children: ReactElement[]) {
         this.tag = tag;
         this.cssRulesetDefault = defaultCSS;
         this.cache = new ElementCache(this);
+
+        // if(this.tag == 'img') {
+            // print(`img.children: `);
+            // print(tPrint(children, 0, 4));
+            // throw new Error();
+        // }
 
         // Handle properties.
         if (props['id'] != null) this.id = props['id'];
@@ -77,6 +90,9 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
         if (children && children.length) {
             for (let index = 0; index < children.length; index++) {
                 const child = children[index] as HTMLElement<string>;
+                // if (child.dispatchEvent == null) {
+                    // throw new Error();
+                // }
                 this.appendChild(child);
             }
         }
@@ -313,6 +329,72 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
         }
     }
 
+    dispatchEvent(event: Event<string>): void {
+        let listeners = this.listeners[event._type];
+
+        // Nothing to listen. Nothing to do here.
+        if (listeners == null || listeners.length == 0) {
+            this.dispatchEventToChildren(event);
+            return;
+        }
+
+        for (let index = 0; index < listeners.length; index++) {
+            if (event.test(this)) {
+                listeners[index](event.cloneEvent(this));
+            }
+        }
+
+        this.dispatchEventToChildren(event);
+    }
+
+    dispatchEventToChildren(event: Event<string>): void {
+        if (this.children.length == 0) return;
+        for (let index = 0; index < this.children.length; index++) {
+            const child = this.children[index];
+            if (child != null) {
+
+                if (child.dispatchEvent != null) {
+                    child.dispatchEvent(event);
+                } else {
+                    print('NO dispatchEvent() for child !!!');
+                    print(child);
+                    print(tPrint(child, 0, 1));
+                    // print(JSON.stringify(child));
+                }
+            }
+        }
+    }
+
+    addEventListener(type: string, listener: EventListener, options?: boolean | AddEventListenerOptions): void {
+        let listeners = this.listeners[type];
+
+        // Create a new array to register listeners for this event type.
+        if (!listeners) {
+            listeners = [];
+            this.listeners[type] = listeners;
+        } else if (listeners.length != 0) {
+            const index = listeners.indexOf(listener);
+            if (index != -1) listeners.splice(index, 1);
+        }
+
+        // Finally, add the listener.
+        listeners.push(listener);
+    }
+
+    removeEventListener(type: string, listener: EventListener, options?: boolean | RemoveEventListenerOptions): void {
+        const listeners = this.listeners[type];
+
+        // No listener to remove.
+        if (!listeners) return;
+
+        // Remove listener. (If present)
+        const index = listeners.indexOf(listener);
+        if (index != -1) listeners.splice(index, 1);
+
+        // Clean up array for memory efficiency.
+        if (listeners.length == 0) delete this.listeners[type];
+    }
+
     /**
      * (Hook from UIElement when a resize occurs)
      */
@@ -375,5 +457,17 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
 
     hasChildren(): boolean {
         return this.children.length !== 0;
+    }
+
+    printTree(indent: number): string {
+        let s = `${' '.repeat(indent * 4)}[${this.tag}]\n`;
+        for (const child of this.children) {
+            if (child.tag) {
+                s += child.printTree(indent + 1);
+            } else {
+                s += `${' '.repeat((indent + 1) * 4)}[???]\n`;
+            }
+        }
+        return s;
     }
 } 

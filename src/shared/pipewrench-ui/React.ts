@@ -8,6 +8,7 @@ import { ImageAttributes, HTMLImageElement } from './html/elements/img';
 import { RadialMenuAttributes, HTMLRadialMenu } from './html/elements/radialmenu';
 import { HTMLRawText } from './html/elements/rawtext';
 import { SpanAttributes, HTMLSpanElement } from './html/elements/span';
+import { tPrint } from './util/table';
 
 /* ########################################################## */
 
@@ -83,7 +84,9 @@ export namespace PipeWrenchUI {
           recursiveFlattenChildren(child, target);
         }
       } else {
-        target.push(children);
+        if((children as any).tag != null) {
+          target.push(children);
+        }
       }
     }
     else {

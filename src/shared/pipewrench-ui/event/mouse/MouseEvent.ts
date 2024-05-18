@@ -1,7 +1,17 @@
+import { Keyboard } from "@asledgehammer/pipewrench";
+import { HTMLElement } from "../../html/HTMLElement";
 import { int } from "../../util/Alias";
 import { Event } from "../Event";
 
-export class MouseEvent<Type extends string> extends Event<Type> {
+export type MouseData = {
+    screenX: int;
+    screenY: int;
+    dx: int;
+    dy: int;
+    buttons: boolean[] | int;
+}
+
+export abstract class MouseEvent<Type extends string> extends Event<Type> {
 
     /** Returns true if the alt key was down when the mouse event was fired. */
     readonly altKey: boolean;
@@ -69,7 +79,33 @@ export class MouseEvent<Type extends string> extends Event<Type> {
         return this.clientY;
     }
 
-    constructor(_type: Type) {
+    constructor(_type: Type, data: MouseData, target: HTMLElement<string>) {
         super(_type);
+
+        const { buttons, dx, dy, screenX, screenY } = data;
+
+        this.offsetX = target ? screenX - target.cache.inner.x1 : screenX;
+        this.offsetY = target ? screenY - target.cache.inner.y1 : screenY;
+        this.clientX = this.pageX = this.screenX = screenX;
+        this.clientY = this.pageY = this.screenY = screenY;
+        this.movementX = dx;
+        this.movementY = dy;
+
+        if (Array.isArray(buttons)) {
+            let btns = 0;
+            // Count how many buttons are currently pressed here.
+            for (let index = 0; index < buttons.length; index++) {
+                if (buttons[index]) btns++;
+            }
+            this.buttons = btns;
+        } else {
+            this.buttons = buttons;
+        }
+
+        this.altKey = Keyboard.isKeyDown(Keyboard.KEY_LMENU) || Keyboard.isKeyDown(Keyboard.KEY_RMENU);
+        this.ctrlKey = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+        this.metaKey = Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA);
+        this.shiftKey = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+
     }
 }

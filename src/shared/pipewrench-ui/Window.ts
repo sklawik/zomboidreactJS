@@ -1,5 +1,8 @@
-import { HTMLMouse } from "./html/HTMLMouse";
-import { int } from "./util/Alias";
+import { Event } from "./event/Event";
+import { document } from "./html/elements/html";
+import { HTMLMouse } from "./input/HTMLMouse";
+
+import * as JSON from './util/JSON';
 
 export class Window {
     mouse: HTMLMouse;
@@ -12,11 +15,14 @@ export class Window {
         this.mouse.update();
 
         if (this.mouse.moved) {
-            this.onMouseMove(this.mouse.screenX, this.mouse.screenY, this.mouse.dx, this.mouse.dy);
+            this.triggerEvent(this.mouse.newMoveEvent(document));
         }
     }
 
-    onMouseMove(x: int, y: int, dx: int, dy: int) {
-        print('onMouseMove: x: ' + x + ', y: ' + y + ', dx: ' + dx + ', dy: ' + dy);
+    triggerEvent(event: Event<string>) {
+        document.dispatchEvent(event);
+        // print(JSON.stringify(event));
     }
 }
+
+export let window: Window = new Window();

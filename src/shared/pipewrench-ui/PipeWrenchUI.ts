@@ -1,10 +1,6 @@
 import { onFrontEndTick, onMainMenuEnter, onTickEvenPaused } from "@asledgehammer/pipewrench-events";
-import { HTMLDocument } from "./html/elements/html";
-import { Window } from "./Window";
-import { initPZ } from "./html/PZ";
-
-export let window: Window = new Window();
-export let document: HTMLDocument = new HTMLDocument({}, []);
+import { window } from "./Window";
+import { document } from "./html/elements/html";
 
 onMainMenuEnter.addListener(() => {
 
@@ -12,8 +8,6 @@ onMainMenuEnter.addListener(() => {
     window.update();
     document.update2();
   }
-
-  // initPZ();
 
   // (The main menu has a separate tick from in-game)
   onFrontEndTick.addListener(update);

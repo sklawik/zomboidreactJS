@@ -4,6 +4,7 @@ import { asRGBA } from '../../css/color/RGBA';
 import { TextureCache } from '../../TextureCache';
 import { AnyProps, ReactElement } from '../../React';
 import { getUIElement } from '../PZ';
+import { tPrint } from '../../util/table';
 
 const COLOR_WHITE = asRGBA(1, 1, 1, 1, "1");
 const COLOR_TRANSPARENT = asRGBA(1, 1, 1, 0, "1");

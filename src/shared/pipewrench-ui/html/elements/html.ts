@@ -16,6 +16,7 @@ export const CSS_DEFAULT_HTML = {
 export class HTMLDocument extends HTMLElement<'html'> implements IPWUIHtmlAttributes {
 
   readonly body: HTMLBodyElement;
+  debug: boolean = false;
 
   constructor(props: AnyProps, children: ReactElement[]) {
     super('html', CSS_DEFAULT_HTML, props, children);
@@ -26,7 +27,7 @@ export class HTMLDocument extends HTMLElement<'html'> implements IPWUIHtmlAttrib
 
   protected updateInternal(): void {
     const javaObject = getUIElement();
-    if(javaObject == null) initPZ(this);
+    if (javaObject == null) initPZ(this);
   }
 
   prerender(): void {
@@ -81,8 +82,25 @@ export class HTMLDocument extends HTMLElement<'html'> implements IPWUIHtmlAttrib
     throw new Error('Method not implemented.');
   }
 
-  getElementById(): HTMLElement<string> | null {
-    // TODO: Implement.
-    throw new Error('Method not implemented.');
+  getElementById(id: string): HTMLElement<string> | null {
+
+    let found: HTMLElement<string> | null = null;
+
+    const recurse = function (children: HTMLElement<string>[]): void {
+      for (let index = 0; index < children.length; index++) {
+        if (found != null) break;
+        const child = children[index];
+        if (child != null && child.id == id) {
+          found = child;
+          break;
+        }
+        if (child.children != null) recurse(child.children);
+      }
+    }
+
+    recurse(this.children);
+    return found;
   }
 }
+
+export let document: HTMLDocument = new HTMLDocument({}, []);
