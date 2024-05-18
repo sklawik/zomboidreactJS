@@ -7,8 +7,8 @@ import { DivAttributes, HTMLDivElement } from './html/elements/div';
 import { ImageAttributes, HTMLImageElement } from './html/elements/img';
 import { RadialMenuAttributes, HTMLRadialMenu } from './html/elements/radialmenu';
 import { HTMLRawText } from './html/elements/rawtext';
+import { HTMLScriptElement, ScriptAttributes } from './html/elements/script';
 import { SpanAttributes, HTMLSpanElement } from './html/elements/span';
-import { tPrint } from './util/table';
 
 /* ########################################################## */
 
@@ -32,6 +32,7 @@ declare global {
     interface IntrinsicElements {
       body: BodyAttributes;
       div: DivAttributes;
+      script: ScriptAttributes;
       span: SpanAttributes;
       img: ImageAttributes;
       radialmenu: RadialMenuAttributes;
@@ -43,6 +44,7 @@ declare global {
 export let primitives: { [name: string]: ReactElement } = {
   body: HTMLBodyElement,
   div: HTMLDivElement,
+  script: HTMLScriptElement,
   span: HTMLSpanElement,
   img: HTMLImageElement,
   radialmenu: HTMLRadialMenu,

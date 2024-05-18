@@ -12,6 +12,7 @@ import { Event } from "../event/Event";
 
 import * as JSON from '../util/JSON';
 import { tPrint } from "../util/table";
+import { HTMLRawText } from "./elements/rawtext";
 
 export const CSS_DEFAULT_ELEMENT = {
     'background-color': 'transparent',
@@ -67,9 +68,9 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
         this.cache = new ElementCache(this);
 
         // if(this.tag == 'img') {
-            // print(`img.children: `);
-            // print(tPrint(children, 0, 4));
-            // throw new Error();
+        // print(`img.children: `);
+        // print(tPrint(children, 0, 4));
+        // throw new Error();
         // }
 
         // Handle properties.
@@ -88,13 +89,22 @@ export abstract class HTMLElement<T extends string> implements ReactElement, IHT
 
         // Handle children.
         if (children && children.length) {
-            for (let index = 0; index < children.length; index++) {
-                const child = children[index] as HTMLElement<string>;
-                // if (child.dispatchEvent == null) {
+
+            if (tag == 'script') {
+                if (children.length == 1) {
+                    const firstChild = children[0];
+                    this.innerText = (firstChild as HTMLRawText).innerText;
+                }
+            } else {
+                for (let index = 0; index < children.length; index++) {
+                    const child = children[index] as HTMLElement<string>;
+                    // if (child.dispatchEvent == null) {
                     // throw new Error();
-                // }
-                this.appendChild(child);
+                    // }
+                    this.appendChild(child);
+                }
             }
+
         }
     }
 
