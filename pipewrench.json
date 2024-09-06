@@ -1,10 +1,10 @@
 {
   "modInfo": {
-    "name": "PipeWrench-UI",
+    "name": "Rick Grimes main menu theme",
     "poster": "./poster.png",
-    "description": "A HTML library for Project Zomboid.",
-    "id": "@pipewrench-ui",
-    "url": "github.com/asledgehammer"
+    "description": "The brave men main menu theme.",
+    "id": "thebraveman",
+    "url": ""
   },
   "modelsDir": "./src/models",
   "texturesDir": "./src/textures",
