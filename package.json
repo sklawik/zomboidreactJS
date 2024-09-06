@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/asledgehammer/PipeWrench-UI.git#readme",
   "devDependencies": {
-    "@asledgehammer/tstl-pipewrench": "^0.0.13",
+    "@asledgehammer/tstl-pipewrench": "^0.0.21",
     "@types/fs-extra": "^9.0.13",
     "@types/react": "^18.0.26",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
